@@ -9,6 +9,7 @@ cards=[]
 num_players=0
 stat_selected=False
 round_winner_decided=False
+ready = []
 
 @app.route('/')
 def index():
@@ -26,13 +27,24 @@ def get_game(task_id):
         'stat_selected': stat_selected,
         'stat': game['stat'],
         'round_winner_decided': round_winner_decided,
-        'round_winner': game['roun_winner']
-    }	
+        'round_winner': game['round_winner']
+    }
+    return jsonify({'game_obj': game_obj}),200
+
+@app.route('/ready', methods=['POST'])	
+def ready():
+	global ready
+    if not request.json or not 'id' in request.json:
+        abort(400)
+    ready[ready.index(request.json['id'])]=True
+    return jsonify({'task': "done"}), 201
+
 
 @app.route('/creategame', methods=['POST'])
 def create_game():
 	global game
 	global num_players
+	global ready
     if not request.json or not 'players' in request.json:
         abort(400)
     num_players = len(request.json['players'])
@@ -43,6 +55,7 @@ def create_game():
             temp.append(cards[z])
             cards.pop(z)
         cards_dist.append(temp)
+        ready.append(False)
 
     game = {
         'players': request.json['players'],
