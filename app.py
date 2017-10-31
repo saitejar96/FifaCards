@@ -7,10 +7,27 @@ app = Flask(__name__)
 game = {}
 cards=[]
 num_players=0
+stat_selected=False
+round_winner_decided=False
 
 @app.route('/')
 def index():
     return "Hello, World!"
+
+@app.route('/getgame/<int:task_id>', methods=['GET'])
+def get_game(task_id):
+    global game
+    global num_players
+    global stat_selected
+    global round_winner_decided
+    game_obj = {
+        'turn': game['turn'],
+        'card_set': game['cards_dist'][game['players'].index(task_id)],
+        'stat_selected': stat_selected,
+        'stat': game['stat'],
+        'round_winner_decided': round_winner_decided,
+        'round_winner': game['roun_winner']
+    }	
 
 @app.route('/creategame', methods=['POST'])
 def create_game():
@@ -28,8 +45,11 @@ def create_game():
         cards_dist.append(temp)
 
     game = {
-        'players': request.json['players']
-        'turn': 0
+        'players': request.json['players'],
+        'turn': 0,
+        'cards_dist': cards_dist,
+        'stat': -1,
+        'round_winner': -1
     }
     return jsonify({'task': "done"}), 201
 
